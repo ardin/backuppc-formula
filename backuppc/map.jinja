@@ -1,0 +1,32 @@
+{% set backuppc = salt['pillar.get']('backuppc', {
+    'lookup': salt['grains.filter_by']
+    (
+        {
+            'RedHat': {
+                'package': 'BackupPC',
+                'service': 'backuppc',
+                'config_dir': '/etc/BackupPC',
+                'config_file': '/etc/BackupPC/config.pl',
+                'hosts_file': '/etc/BackupPC/hosts',
+                'user': 'backuppc',
+                'group': 'apache',
+            },
+        }, 
+        grain='os_family',
+        default='RedHat',
+    ),
+    'service': {
+        'enable': True,
+        'opts': {},
+    },
+    'host_defaults': {
+        'dhcp': 0,
+        'user': 'backuppc',
+        'moreusers': ''
+    }
+}, merge=True
+) %}
+
+{% macro backuppc_hosts_block(host,dhcp='0',user='backup',moreusers='') -%}
+{{host}} {{dhcp}} {{user}} {{moreusers}}
+{% endmacro %}

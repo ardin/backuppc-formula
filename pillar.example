@@ -1,0 +1,51 @@
+# configure backuppc
+backuppc:
+
+  # minion configuration
+  client:
+    dhcp: 0
+    user: backup
+    moreusers: ''
+
+    # backup is an alias for RsyncShareName
+    backup:
+      /etc: true
+    
+    # raw configuration
+    conf:
+      RsyncClientCmd: '$sshPath -q -x -p 1022 -l root $host $rsyncPath $argList+'
+      RsyncClientRestoreCmd: '$sshPath -q -x -p 65522 -l root $host $rsyncPath $argList+'
+      PingMaxMsec: 100
+      RsyncShareName:
+        - /etc
+        - /root
+        - /home
+
+  # server configuration
+  server:
+    hosts:
+      linux.net:
+        dhcp: 0
+        user: backup
+        moreusers: ''
+        conf:
+          RsyncShareName:
+            - /root
+            - /etc
+            - /home
+            - /var/www
+      windows.com:
+        conf:
+          SmbShareUserName: Anna
+          SmbSharePasswd: pass
+          XferMethod: smb
+          SmbShareName:
+            - C
+            - D
+
+# for each minion expose mine_function
+mine_functions:
+  backuppc_backup:
+    - mine_function: pillar.get
+    - backuppc:client
+
